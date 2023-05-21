@@ -20,7 +20,8 @@ const UsersPage = () => {
             <Link to={id}>{ name}</Link>
           </li>
         ))}
-</ul>
+      </ul>
+      <Link to='add'>Add user</Link>
     </div>
   );
 };

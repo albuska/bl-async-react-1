@@ -1,5 +1,11 @@
 import { createSlice, isAnyOf } from '@reduxjs/toolkit';
-import { fetchDeleteUser, fetchOneUser, fetchUsers } from 'redux/users/usersOperations';
+import {
+  fetchAddUser,
+  fetchDeleteUser,
+  fetchEditUser,
+  fetchOneUser,
+  fetchUsers,
+} from 'redux/users/usersOperations';
 
 // const usersSlice = createSlice({
 //   name: 'users',
@@ -37,22 +43,22 @@ import { fetchDeleteUser, fetchOneUser, fetchUsers } from 'redux/users/usersOper
 //     },
 //   },
 // });
-const handlePending = (state) => {
-state.users.isLoading = true;
-}
+const handlePending = state => {
+  state.users.isLoading = true;
+};
 
 const handleRejected = (state, action) => {
-      state.users.isLoading = false;
-      state.users.error = action.payload;
-}
-const handleFulfilled = (state) => {
-      state.users.isLoading = false;
-        state.users.error = null;
-}
+  state.users.isLoading = false;
+  state.users.error = action.payload;
+};
+const handleFulfilled = state => {
+  state.users.isLoading = false;
+  state.users.error = null;
+};
 
-const extraActions = [fetchUsers, fetchOneUser, fetchDeleteUser];
+const extraActions = [fetchUsers, fetchOneUser, fetchDeleteUser, fetchAddUser];
 
-const getActions = type => isAnyOf(...extraActions.map(item => item[type])); 
+const getActions = type => isAnyOf(...extraActions.map(item => item[type]));
 
 const usersSlice = createSlice({
   name: 'users',
@@ -64,20 +70,33 @@ const usersSlice = createSlice({
       currentUser: null,
     },
   },
-  extraReducers: builder => builder
-    .addCase(fetchUsers.fulfilled, (state, action) => {
-      state.users.items = action.payload;
-    })
-    .addCase(fetchOneUser.fulfilled, (state, action) => {
-      state.users.currentUser = action.payload;
-    })
-    .addCase(fetchDeleteUser.fulfilled, (state, action) => {
-      const index = state.users.items.findIndex(item => item.id === action.payload);
-      state.users.items.splice(index, 1); 
-    })
-    .addMatcher(getActions('pending', handlePending))
-    .addMatcher(getActions('rejected', handleRejected))
-    .addMatcher(getActions('fulfilled', handleFulfilled))
+  extraReducers: builder =>
+    builder
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.users.items = action.payload;
+      })
+      .addCase(fetchOneUser.fulfilled, (state, action) => {
+        state.users.currentUser = action.payload;
+      })
+      .addCase(fetchDeleteUser.fulfilled, (state, action) => {
+        const index = state.users.items.findIndex(
+          item => item.id === action.payload
+        );
+        state.users.items.splice(index, 1);
+      })
+      .addCase(fetchAddUser.fulfilled, (state, action) => {
+        state.users.items.push(action.payload);
+      })
+      .addCase(fetchEditUser.fulfilled, (state, action) => {
+        const index = state.users.items.findIndex(
+          item => item.id === action.payload.id
+        );
+        state.users.items.splice(index, 1, action.payload);
+        state.users.currentUser = action.payload;
+      })
+      .addMatcher(getActions('pending', handlePending))
+      .addMatcher(getActions('rejected', handleRejected))
+      .addMatcher(getActions('fulfilled', handleFulfilled)),
 });
 
 export const usersReducer = usersSlice.reducer;
